@@ -1,0 +1,29 @@
+# Dados do Kaggle (baixados via API, não versionar)
+data/
+*.zip
+*.csv
+
+# Credencial da API do Kaggle
+kaggle.json
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+
+# Modelos pesados (versionar só se forem pequenos)
+models/*.pkl
+models/*.joblib
+models/*.txt
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Configuração local do Claude Code
+.claude/settings.local.json
