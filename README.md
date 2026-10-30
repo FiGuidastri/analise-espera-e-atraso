@@ -1,231 +1,123 @@
 # Atraso de Entrega e Satisfação do Cliente — Olist
 
-Projeto de Ciência de Dados e Machine Learning que **prevê, no momento da compra, a probabilidade de um pedido atrasar** e **mede o efeito causal do atraso sobre a nota de avaliação**, com base no dataset público de e-commerce da Olist. Os requisitos completos de cada análise estão em [PRD.md](DOCs/PRD.md).
+Projeto de Ciência de Dados que **prevê, no momento da compra, a probabilidade de um pedido atrasar** e **mede o efeito causal do atraso sobre a nota de avaliação**, com o dataset público de e-commerce da Olist. Os requisitos de cada análise estão no [PRD](DOCs/PRD.md); os IDs (RA-xx, H-xx, RNF-xx) são citados nos notebooks.
 
-> **Como usar este README:** ele é o roteiro de execução. Cada etapa traz o objetivo, as tarefas, as perguntas que você deve conseguir responder ao final e o entregável. Marque as tarefas conforme avança e, ao terminar o projeto, substitua as seções de roteiro pelos resultados.
+## Problema
 
-## Estrutura sugerida do repositório
-
-```
-analise-espera-e-atraso/
-├── README.md
-├── DOCs/
-│   └── PRD.md
-├── requirements.txt
-├── data/                  # fora do Git (.gitignore)
-├── notebooks/             # scripts .py com células #%% (formato percent)
-│   ├── 01_carga_e_alvo.py
-│   ├── 02_atributos.py
-│   ├── 03_exploracao.py
-│   ├── 04_modelagem.py
-│   ├── 05_decisao_custo.py
-│   ├── 06_causal.py
-│   ├── 07_texto.py
-│   └── 08_impacto.py
-├── src/
-│   └── features.py        # funções reutilizáveis entre notebooks
-└── models/
-```
-
-## Visão geral das etapas
-
-| Etapa | Notebook | Requisito no PRD | Entregável |
-|---|---|---|---|
-| 0. Preparação | 01 | RNF-01, RNF-05 | Dados baixados via API do Kaggle e ambiente reproduzível |
-| 1. Carga e alvo | 01 | RA-01 | Variável de atraso e taxa global |
-| 2. Atributos | 02 | RA-02 | Base com uma linha por pedido e dicionário de atributos |
-| 3. Exploração | 03 | RA-03 | Gráficos e conclusões sobre H-01 a H-03 |
-| 4. Modelagem | 04 | RA-04, RA-06 | Baseline, modelo principal e SHAP |
-| 5. Decisão por custo | 05 | RA-05 | Limiar ótimo e economia estimada |
-| 6. Inferência causal | 06 | RA-07 | Efeito do atraso na nota com intervalo de confiança |
-| 7. Texto | 07 | RA-08 | Termos associados a atraso |
-| 8. Impacto | 08 | RA-09 | Tabela de cenários de negócio |
-| 9. Publicação | — | RNF-04 | README final e repositório no GitHub |
-
----
-
-## Etapa 0 — Preparação do ambiente
-
-**Objetivo.** Deixar os dados acessíveis de forma reproduzível, baixando-os pela API do Kaggle.
-
-- [x] Criar em `notebooks/01_carga_e_alvo.py` uma célula `#%%` que baixa o dataset `olistbr/brazilian-ecommerce` (versão 2, fixa) com `kagglehub`, gravando direto em `data/` (`output_dir`) e pulando o download se os CSVs já existirem
-- [x] Confirmar que os nove CSVs estão presentes (célula com `assert`)
-- [x] Definir uma semente aleatória global e fixar as versões das bibliotecas em `requirements.txt`
-
-**Pergunta de checagem.** Se outra pessoa clonar o repositório, ela consegue rodar o notebook apenas instalando o `requirements.txt`?
-
----
-
-## Etapa 1 — Carga dos dados e definição do alvo
-
-**Objetivo.** Entender as tabelas e construir a variável de atraso (RA-01).
-
-- [ ] Carregar as nove tabelas e verificar o formato (linhas e colunas) de cada uma
-- [ ] Desenhar, à mão ou numa ferramenta, o diagrama de relacionamento entre as tabelas e identificar as chaves (`order_id`, `customer_id`, `seller_id`, `product_id`, prefixo de CEP)
-- [ ] Converter as colunas de data para o tipo datetime
-- [ ] Ver a distribuição de `order_status` e decidir o filtro
-- [ ] Criar a variável binária de atraso comparando apenas as datas (sem horário) de entrega real e estimada
-- [ ] Criar a variável contínua de dias de diferença
-- [ ] Calcular a taxa de atraso global
-
-**Perguntas de checagem.** Qual é a taxa de atraso? Por que a comparação deve ignorar o horário? Quantos pedidos foram descartados pelo filtro e por quê?
-
-**Cuidado.** A data estimada vem sem horário (meia-noite). Comparar os timestamps diretamente marcaria como atrasado um pedido entregue no próprio dia estimado.
-
----
-
-## Etapa 2 — Engenharia de atributos
-
-**Objetivo.** Construir a base analítica com uma linha por pedido, usando apenas informação disponível no momento da compra (RA-02).
-
-- [ ] Para cada coluna candidata, perguntar: *essa informação existe no instante em que o cliente clica em comprar?* Descartar o que não existir
-- [ ] Agregar os itens por pedido: quantidade de itens, de produtos e de vendedores, preço total, frete total, peso e volume totais
-- [ ] Definir uma regra para o vendedor e a categoria principais (por exemplo, o item de maior preço) e documentá-la
-- [ ] Agregar os pagamentos por pedido: forma de pagamento predominante e número de parcelas
-- [ ] Tratar avaliações duplicadas por pedido (manter uma por pedido, com critério documentado)
-- [ ] Calcular latitude e longitude médias por prefixo de CEP e, a partir delas, a distância cliente–vendedor (fórmula de Haversine)
-- [ ] Criar os atributos derivados: prazo estimado em dias, prazo limite de envio em dias, frete relativo ao preço, mesmo estado (sim ou não), mês, dia da semana e hora da compra
-- [ ] Filtrar as compras a partir de janeiro de 2017 (o volume de 2016 é muito baixo)
-- [ ] Escrever o dicionário de atributos: nome, descrição, tabela de origem e por que não vaza informação
-- [ ] Mover as funções de agregação para `src/features.py`
-
-**Perguntas de checagem.** Quantas linhas tem a base final? Quantos pedidos ficaram sem distância calculada? Algum atributo depende de algo que acontece depois da compra?
-
-**Cuidado.** `order_approved_at`, `order_delivered_carrier_date` e qualquer informação da avaliação são posteriores à compra e **não podem** ser atributos do modelo preditivo.
-
----
-
-## Etapa 3 — Análise exploratória
-
-**Objetivo.** Validar as hipóteses H-01 a H-03 e encontrar problemas de qualidade antes de modelar (RA-03).
-
-- [ ] Ausentes por coluna e decisão de tratamento para cada uma
-- [ ] Taxa de atraso por mês de compra (há picos? em quais meses?)
-- [ ] Taxa de atraso por UF do cliente e por UF do vendedor
-- [ ] Taxa de atraso por faixa de distância
-- [ ] Taxa de atraso por faixa de prazo estimado
-- [ ] Distribuição das notas para pedidos atrasados e no prazo
-- [ ] Registrar uma conclusão preliminar para cada hipótese
-
-**Perguntas de checagem.** A taxa de atraso é estável no tempo? O que isso implica para a forma de validar o modelo? A queda da nota com o atraso é grande o suficiente para justificar a análise causal?
-
----
-
-## Etapa 4 — Modelagem preditiva
-
-**Objetivo.** Construir um baseline e um modelo principal, avaliados de forma temporal (RA-04 e RA-06).
-
-- [ ] Definir as datas de corte de treino, validação e teste em ordem cronológica
-- [ ] Excluir do teste as últimas semanas da base e justificar (pedidos recentes só aparecem se já foram entregues, o que reduz artificialmente a taxa de atraso)
-- [ ] Verificar a taxa de atraso em cada conjunto
-- [ ] Treinar o baseline: regressão logística com imputação, padronização e one-hot
-- [ ] Treinar o modelo principal: LightGBM com parada antecipada na validação
-- [ ] Comparar os dois modelos por PR-AUC e ROC-AUC na validação e no teste
-- [ ] Gerar a importância global dos atributos com SHAP
-- [ ] Explicar individualmente três pedidos de alto risco
-- [ ] Fechar as hipóteses H-01 a H-03 com base no SHAP
-
-**Perguntas de checagem.** Por que PR-AUC e não acurácia? Quanto o modelo principal ganha sobre o baseline? Os atributos mais importantes fazem sentido para o negócio?
-
-**Cuidado.** Nunca escolha hiperparâmetros ou limiares olhando o conjunto de teste. O teste é usado uma única vez, no final.
-
----
-
-## Etapa 5 — Regra de decisão por custo
-
-**Objetivo.** Transformar probabilidade em decisão: a partir de qual risco vale agir? (RA-05)
-
-- [ ] Definir as premissas: custo de uma ação preventiva (contato proativo, upgrade de frete) e custo de um atraso não tratado (atendimento, cupom, avaliação negativa)
-- [ ] Escrever a função de custo total para um dado limiar
-- [ ] Varrer os limiares no conjunto de validação e escolher o de menor custo
-- [ ] Aplicar o limiar no teste e comparar com o cenário sem modelo
-- [ ] Repetir para pelo menos três combinações de premissas (análise de sensibilidade)
-
-**Perguntas de checagem.** Qual é a economia percentual? Com que premissas de custo o modelo deixa de compensar?
-
----
-
-## Etapa 6 — Inferência causal
-
-**Objetivo.** Estimar quanto o atraso, isoladamente, reduz a nota (RA-07).
-
-- [ ] Calcular a diferença ingênua de nota média entre atrasados e não atrasados
-- [ ] Entender por que essa diferença pode estar enviesada: pedidos que atrasam têm perfil diferente (região, produto, frete)
-- [ ] Estudar o Double Machine Learning no modelo parcialmente linear (referência: Chernozhukov et al., 2018)
-- [ ] Implementar os três passos: prever a nota a partir dos confundidores, prever o atraso a partir dos confundidores e regredir o resíduo da nota no resíduo do atraso, com *cross-fitting* em K partições
-- [ ] Calcular o erro padrão e o intervalo de confiança de 95%
-- [ ] Repetir para o desfecho binário (nota menor ou igual a 2)
-- [ ] Construir a análise dose-resposta: nota média por faixa de dias de diferença
-- [ ] Comparar o efeito causal com a diferença ingênua e interpretar
-- [ ] Redigir a seção de limitações (confundidores não observados, como a qualidade do vendedor)
-
-**Perguntas de checagem.** O efeito causal é maior ou menor que a diferença ingênua? Por quê? O efeito cresce com os dias de atraso (H-05)?
-
-**Alternativa.** Se preferir usar uma biblioteca, `DoubleML` e `EconML` implementam o mesmo método. Implementar manualmente primeiro ajuda a entender e a explicar em entrevistas.
-
----
-
-## Etapa 7 — Análise textual dos comentários
-
-**Objetivo.** Ouvir a voz do cliente para validar as conclusões causais (RA-08).
-
-- [ ] Filtrar as avaliações com comentário preenchido e contar quantas são
-- [ ] Pré-processar: minúsculas, remoção de acentos e de stopwords em português
-- [ ] Vetorizar com TF-IDF (unigramas e bigramas, frequência mínima)
-- [ ] Treinar uma regressão logística para separar comentários de pedidos atrasados e no prazo
-- [ ] Listar os termos com os maiores e os menores coeficientes
-- [ ] Interpretar: os termos confirmam que a insatisfação está ligada ao prazo?
-
-**Pergunta de checagem.** Os termos associados a atraso falam de prazo e entrega ou de outros problemas, como produto errado ou defeito?
-
----
-
-## Etapa 8 — Impacto de negócio
-
-**Objetivo.** Responder quanto vale reduzir atrasos (RA-09).
-
-- [ ] Usar o efeito causal e a taxa de atraso observada
-- [ ] Calcular, para reduções de 10%, 25% e 50% na taxa de atraso, o ganho esperado na nota média e as avaliações negativas evitadas a cada 10 mil pedidos
-- [ ] Montar a tabela de cenários e declarar as premissas
-
-**Pergunta de checagem.** Um gestor não técnico entenderia o resultado em uma frase?
-
----
-
-## Etapa 9 — Publicação no portfólio
-
-**Objetivo.** Transformar o trabalho em algo que um recrutador entenda em dois minutos (RNF-04).
-
-- [ ] Salvar o modelo, a lista de atributos e o limiar em `models/`
-- [ ] Gerar o `requirements.txt`
-- [ ] Reescrever este README substituindo o roteiro pelas seções abaixo
-- [ ] Publicar no GitHub com `data/` no `.gitignore`
-- [ ] Opcional: criar uma aplicação em Streamlit que recebe os dados de um pedido e retorna o risco de atraso
-
-### Modelo do README final
-
-| Seção | Conteúdo |
-|---|---|
-| Problema | Duas ou três frases sobre o problema de negócio |
-| Dados | Fonte, período e volume |
-| Abordagem | Diagrama ou lista curta das etapas |
-| Resultados | PR-AUC contra o baseline, economia estimada, efeito causal com IC e tabela de impacto |
-| Principais fatores de atraso | Gráfico SHAP e interpretação |
-| Limitações | Premissas causais, premissas de custo e período dos dados |
-| Como reproduzir | Instalar o `requirements.txt` e executar os notebooks `.py` em ordem (o dataset é público; o `kagglehub` baixa sem credencial) |
-| Próximos passos | Melhorias planejadas |
-
----
-
-## Próximos passos (após a primeira versão)
-
-| Melhoria | Por que importa |
-|---|---|
-| Taxa histórica de atraso por vendedor, calculada só com entregas concluídas antes de cada compra | Costuma ser o atributo mais forte e exige controle rigoroso de vazamento |
-| Calibração das probabilidades | Permite comunicar o risco em percentual confiável |
-| Análise de sensibilidade causal | Mostra a robustez do efeito a confundidores não observados |
-| API em FastAPI | Demonstra capacidade de levar o modelo para produção |
+Num marketplace, o prazo estimado no checkout é uma promessa. Hoje a operação só descobre o atraso depois que ele acontece, quando a avaliação negativa já foi registrada. O projeto responde duas perguntas: dá para **antecipar** quais pedidos vão atrasar? E **quanto** o atraso, isoladamente, derruba a nota?
 
 ## Dados
 
-Brazilian E-Commerce Public Dataset by Olist, disponível em [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).
+- [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (versão 2), nove tabelas relacionais.
+- Base analítica: **96.203 pedidos entregues**, comprados entre jan/2017 e ago/2018, uma linha por pedido.
+- Alvo: atraso = data de entrega real posterior à estimada, **comparando só a data**. Comparar timestamps marcaria 1.291 pedidos entregues no próprio dia estimado como atrasados.
+- **Taxa de atraso global: 6,79%** — e muito instável no tempo (2,8% a 19,0% ao mês).
+
+![Taxa mensal](reports/figuras/03_taxa_mensal.png)
+
+## Abordagem
+
+| Etapa | Notebook | O que faz |
+|---|---|---|
+| Carga e alvo | `01_carga_e_alvo.py` | Download via `kagglehub`, filtros e alvo (RA-01) |
+| Atributos | `02_atributos.py` | Base de uma linha por pedido só com informação do clique de compra; dicionário em `reports/dicionario_atributos.csv` (RA-02) |
+| Exploração | `03_exploracao.py` | Qualidade de dados e hipóteses H-01 a H-03 (RA-03) |
+| Modelagem | `04_modelagem.py` | Split temporal, regressão logística × LightGBM, SHAP (RA-04, RA-06) |
+| Decisão por custo | `05_decisao_custo.py` | Limiar que minimiza custo e sensibilidade das premissas (RA-05) |
+| Causal | `06_causal.py` | Double Machine Learning implementado à mão, dose-resposta (RA-07) |
+| Texto | `07_texto.py` | TF-IDF + regressão logística nos comentários (RA-08) |
+| Impacto | `08_impacto.py` | Cenários de redução de atraso (RA-09) |
+
+Funções de agregação e atributos ficam em `src/features.py`. Regras de agregação: o **item de maior preço** define vendedor e categoria principais; a **avaliação respondida por último** é a que vale quando um pedido tem várias; distância é Haversine entre as coordenadas médias dos prefixos de CEP.
+
+## Resultados
+
+### 1. Previsão de atraso
+
+Divisão temporal sem embaralhar: treino jan/2017–fev/2018 (57.050 pedidos, 6,6% de atraso), validação mar–mai/2018 (20.550, 10,1%), teste jun–12/ago/2018 (15.594, 3,7%). As compras a partir de 13/08/2018 ficaram fora: os atrasados dessas semanas ainda não tinham sido entregues quando a base foi gerada, e a taxa cai artificialmente para 0–3%. Hiperparâmetros e conjunto de atributos foram escolhidos só na validação; o teste foi usado uma vez.
+
+| | PR-AUC validação | PR-AUC teste | ROC-AUC teste |
+|---|---|---|---|
+| Aleatório (= taxa de atraso) | 0,101 | 0,037 | 0,500 |
+| Regressão logística (baseline) | 0,245 | **0,078** | 0,708 |
+| LightGBM | 0,250 | 0,072 | 0,702 |
+
+**O LightGBM não superou o baseline no teste.** A diferença (−0,006) tem IC 95% bootstrap de −0,017 a +0,004, ou seja, os dois modelos são equivalentes. Ambos ficam cerca de 2× acima do aleatório. O critério de aceite do RA-04 não foi atendido. Com atributos só de pré-compra, boa parte do atraso depende do que acontece depois (transportadora, vendedor, a greve dos caminhoneiros de mai/2018), e a estrutura que o boosting capta a mais não se sustenta entre períodos tão diferentes.
+
+### 2. Principais fatores de atraso
+
+![SHAP](reports/figuras/04_shap_beeswarm.png)
+
+- **H-01 confirmada — distância.** A taxa vai de 4,5% (< 100 km) a 12,1% (≥ 2.000 km); no SHAP, mais distância sempre aumenta o risco (correlação valor × SHAP = +0,97).
+- **H-02 confirmada — Norte e Nordeste.** Nordeste atrasa 12,8% e Norte 8,6%, contra 6,1% no Sudeste e 5,9% no Sul; `uf_cliente` é o 2º atributo mais importante, com contribuição média de +0,83 log-odds no Nordeste.
+- **H-03 confirmada — prazo curto.** Prazos < 10 dias atrasam 12,7%; ≥ 40 dias, 2,6%. No SHAP, prazo maior sempre reduz o risco (correlação −0,99).
+- O atributo mais importante é o **mês da compra**, que capta os picos de Black Friday 2017 e fev–mar/2018. Ele foi mantido porque ganhou na validação, mas é o mais frágil fora da amostra.
+
+### 3. Decisão por custo
+
+Premissas centrais: contato proativo custa R$ 2, um atraso não tratado custa R$ 40, e avisar antes evita 50% desse custo. Limiar escolhido na validação: risco ≥ 5%.
+
+| Cenário | Economia na validação | Economia no teste |
+|---|---|---|
+| Central (R$ 2 / R$ 40 / 50%) | +15,9% | **−6,5%** |
+| Ação mais cara (R$ 5) | +3,3% | −4,9% |
+| Atraso mais barato (R$ 20) | +5,5% | −8,2% |
+| Ação pouco efetiva (20%) | +1,3% | −1,9% |
+| Atraso mais caro (R$ 80) | +27,7% | **+6,5%** |
+
+A regra economiza num período de muitos atrasos (validação, 10%) e **perde dinheiro no teste** (3,7%), onde a precisão entre os sinalizados (7–11%) fica perto do risco de equilíbrio (`custo da ação / (efetividade × custo do atraso)` = 10% no cenário central). O modelo só compensa em períodos críticos ou quando o atraso é caro.
+
+### 4. Efeito causal do atraso na nota (Double Machine Learning)
+
+Modelo parcialmente linear com cross-fitting em 5 partições e LightGBM nos modelos auxiliares. Os confundidores são os atributos pré-compra mais a tendência temporal. Amostra: 95.560 pedidos com avaliação.
+
+| Desfecho | Diferença ingênua | Efeito causal (DML) | IC 95% |
+|---|---|---|---|
+| Nota (1–5) | −2,02 | **−1,92** | −1,96 a −1,88 |
+| P(nota ≤ 2) | +53,2 p.p. | **+51,1 p.p.** | +49,9 a +52,4 |
+
+- **H-04 confirmada.** Atrasar derruba a nota em ~1,9 ponto mesmo comparando pedidos de perfil igual. Só 0,1 ponto da diferença bruta vinha do perfil dos pedidos que atrasam.
+- **H-05 confirmada, com teto.** O efeito cresce com a duração do atraso: −0,97 (1–3 dias), −2,10 (4–7), −2,50 (8–14). Depois estabiliza (−2,41 em ≥ 15 dias), com a nota já perto do piso.
+
+![Dose-resposta](reports/figuras/06_dose_resposta.png)
+
+**Voz do cliente (RA-08).** Num classificador TF-IDF sobre 40.392 comentários (ROC-AUC 0,90), os termos de pedidos atrasados falam de prazo ("atraso", "não chegou", "não recebi", "correios", "não cumpriu"). Já "defeito", "quebrado", "trocar" e "devolução" aparecem do lado dos pedidos **no prazo**. A insatisfação dos atrasados é com o prazo, não com a qualidade, o que reforça a leitura causal.
+
+### 5. Impacto de negócio
+
+| Redução da taxa de atraso | Atrasos evitados / 10 mil pedidos | Ganho na nota média | Avaliações ≤ 2 evitadas / 10 mil pedidos |
+|---|---|---|---|
+| 10% | 68 | +0,013 | 35 |
+| 25% | 170 | +0,033 | 87 |
+| 50% | 339 | +0,065 | 173 |
+
+**Em uma frase:** cortar os atrasos pela metade evita cerca de 170 avaliações negativas a cada 10 mil pedidos. Como o efeito cresce com os dias de atraso, atacar primeiro os atrasos longos rende mais.
+
+## Limitações
+
+- **Causal:** supõe que não há confundidores não observados. A qualidade do vendedor afeta atraso e nota ao mesmo tempo e não está no modelo, então o efeito pode estar superestimado. A nota só existe para quem avaliou (possível viés de seleção).
+- **Custo:** as premissas em R$ são hipotéticas; a sensibilidade mostra que a conclusão muda com elas.
+- **Período:** 20 meses de dados com regimes muito diferentes (Black Friday, fev–mar/2018, greve de mai/2018). O mês como atributo e o limiar fixo sofrem com isso.
+- `prazo_envio_dias` usa o limite de postagem do vendedor, definido na venda a partir do prazo de manuseio. É o único atributo com essa ressalva.
+
+## Como reproduzir
+
+```bash
+pip install -r requirements.txt
+cd notebooks
+for n in 0*.py; do echo "== $n"; MPLBACKEND=Agg python "$n" || break; done
+```
+
+O dataset é público e o `kagglehub` baixa sem credencial, direto em `data/`. Os notebooks também rodam célula a célula (`#%%`) no VS Code ou no Spyder. A execução completa leva cerca de 6 minutos; o `06_causal.py` sozinho, uns 3.
+
+Saídas: `models/` (modelo LightGBM, atributos e limiar), `reports/` (dicionário de atributos, tabelas de resultado) e `reports/figuras/`.
+
+## Próximos passos
+
+| Melhoria | Por que importa |
+|---|---|
+| Taxa histórica de atraso por vendedor, calculada só com entregas concluídas antes de cada compra | Provavelmente o atributo mais forte que falta; exige controle rigoroso de vazamento |
+| Recalibrar o risco por período | O limiar fixo sofre com a variação da taxa de atraso entre períodos |
+| Validação temporal com várias janelas (rolling origin) | Escolha de modelo menos dependente de um único período de validação |
+| Análise de sensibilidade causal (ex.: E-value) | Mede quão forte um confundidor oculto precisaria ser para anular o efeito |
+| API em FastAPI ou app em Streamlit | Leva o modelo para uso |

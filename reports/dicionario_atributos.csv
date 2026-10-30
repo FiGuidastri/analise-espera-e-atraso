@@ -1,0 +1,22 @@
+atributo,descricao,origem,por_que_nao_vaza
+n_itens,Quantidade de itens do pedido,order_items,Itens do carrinho no clique
+n_produtos,Quantidade de produtos distintos,order_items,Itens do carrinho no clique
+n_vendedores,Quantidade de vendedores distintos,order_items,Itens do carrinho no clique
+preco_total,Soma dos preços dos itens (R$),order_items,Preço exibido no checkout
+frete_total,Soma do frete dos itens (R$),order_items,Frete cotado no checkout
+frete_relativo,frete_total / preco_total,order_items,Derivado de valores do checkout
+peso_total_g,Soma do peso cadastrado dos produtos,products,Cadastro do produto
+volume_total_cm3,Soma do volume (C x A x L) dos produtos,products,Cadastro do produto
+n_fotos_principal,Fotos do anúncio do item principal,products,Cadastro do produto
+categoria_principal,Categoria (inglês) do item de maior preço,products + translation,Cadastro do produto
+forma_pagamento,Forma de pagamento de maior valor,order_payments,Escolhida no checkout
+parcelas,Número máximo de parcelas,order_payments,Escolhido no checkout
+uf_cliente,UF do cliente,customers,Endereço de entrega informado na compra
+uf_vendedor,UF do vendedor principal,sellers,Cadastro do vendedor
+mesmo_estado,1 se cliente e vendedor na mesma UF,customers + sellers,Derivado de cadastros
+distancia_km,Distância Haversine cliente–vendedor,geolocation,Derivado dos CEPs cadastrados
+prazo_estimado_dias,Dias entre a compra e a data estimada de entrega,orders,Prazo prometido no checkout
+prazo_envio_dias,Dias entre a compra e o limite de postagem do vendedor,order_items,Prazo de manuseio definido na venda (*)
+mes,Mês da compra,orders,Momento da compra
+dia_semana,Dia da semana da compra (0 = segunda),orders,Momento da compra
+hora,Hora da compra,orders,Momento da compra

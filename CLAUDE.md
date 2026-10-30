@@ -10,21 +10,23 @@ Projeto de portfólio de Ciência de Dados (em português) sobre o dataset Olist
 2. **Causal** — estimar quanto o atraso, isoladamente, reduz a nota de avaliação (Double Machine Learning).
 
 Documentos de referência (leia antes de implementar uma etapa):
-- `README.md` — roteiro de execução por etapa (0 a 9), com checklists, perguntas de checagem e cuidados. Ao final do projeto, as seções de roteiro devem ser substituídas pelos resultados (modelo de README final no próprio arquivo).
+- `README.md` — README final com resultados de todas as etapas (o roteiro original por etapa foi substituído; está no histórico do Git).
 - `DOCs/PRD.md` — requisitos formais: hipóteses H-01..H-05, requisitos de análise RA-01..RA-09 e não funcionais RNF-01..RNF-05. Cite esses IDs no código/markdown dos notebooks.
 
 ## Estado atual e ambiente
 
-- Etapa 0 concluída (setup, download e checagem dos CSVs em `notebooks/01_carga_e_alvo.py`). Próxima: Etapa 1 (RA-01), no mesmo notebook.
+- Etapas 0–9 implementadas; os 8 notebooks rodam em ordem (`cd notebooks; for n in 0*.py; do MPLBACKEND=Agg python "$n" || break; done`, ~6 min).
 - **Notebooks são scripts `.py` no formato percent** (`#%%` delimita células). Não criar nem converter para `.ipynb`.
 - **Dados:** baixados com `kagglehub` (não o pacote `kaggle`/`kaggle.json`), dataset `olistbr/brazilian-ecommerce/versions/2`, numa célula `#%%` no início de `01_carga_e_alvo.py`, gravados direto em `data/` via `output_dir` (não no cache do kagglehub). `data/` não deve ir para o Git.
-- Não há build, lint nem testes. `requirements.txt` tem as versões fixadas (acrescentar libs conforme as etapas exigirem). Ainda não existem `src/` nem `models/` — serão criados nas etapas 2 e 9.
+- Não há build, lint nem testes. `requirements.txt` tem as versões fixadas (acrescentar libs conforme as etapas exigirem).
 
-## Arquitetura planejada
+## Arquitetura
 
 - Notebooks `.py` numerados por etapa: `01_carga_e_alvo`, `02_atributos`, `03_exploracao`, `04_modelagem`, `05_decisao_custo`, `06_causal`, `07_texto`, `08_impacto`.
-- `src/features.py` — funções de agregação/atributos reutilizadas entre notebooks (RNF-03).
-- `models/` — modelo serializado, lista de atributos e limiar escolhido.
+- `src/features.py` — carga, alvo, agregações, `construir_base`, `preparar_x` e as listas `ATRIBUTOS*` (RNF-03). `src/estilo.py` — estilo único dos gráficos.
+- Fluxo de arquivos: 02 grava `data/base_analitica.parquet` (lida por 03–08); 04 grava `data/previsoes.parquet` (lida por 05); 06 grava `reports/resultados_causais.json` (lido por 08). Figuras em `reports/figuras/`.
+- `models/` — modelo serializado (`*.joblib` fora do Git, regenerado pelo 04), `atributos.json` e `limiar.json`.
+- Split temporal fixo no 04: treino < 2018-03-01, validação < 2018-06-01, teste < 2018-08-13 (depois disso, excluído por viés de fim de base).
 - Base analítica: **uma linha por pedido**, compras a partir de jan/2017, apenas pedidos `delivered` com data de entrega preenchida.
 
 ## Regras de domínio que não podem ser violadas

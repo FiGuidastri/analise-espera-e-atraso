@@ -2,6 +2,7 @@
 data/
 *.zip
 *.csv
+!reports/*.csv
 
 # Credencial da API do Kaggle
 kaggle.json

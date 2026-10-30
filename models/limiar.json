@@ -1,0 +1,9 @@
+{
+  "limiar": 0.05,
+  "premissas": {
+    "custo_acao": 2.0,
+    "custo_atraso": 40.0,
+    "efetividade": 0.5
+  },
+  "economia_teste": -0.06460481099656357
+}
