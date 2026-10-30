@@ -48,12 +48,11 @@ analise-espera-e-atraso/
 
 **Objetivo.** Deixar os dados acessíveis de forma reproduzível, baixando-os pela API do Kaggle.
 
-- [ ] Configurar a credencial da API do Kaggle (`kaggle.json`)
-- [ ] Criar em `notebooks/01_carga_e_alvo.py` uma célula `#%%` dedicada a baixar e descompactar o dataset `olistbr/brazilian-ecommerce` em `data/`
-- [ ] Listar os arquivos e confirmar que os nove CSVs estão presentes
-- [ ] Definir uma semente aleatória global e anotar as versões das bibliotecas
+- [x] Criar em `notebooks/01_carga_e_alvo.py` uma célula `#%%` que baixa o dataset `olistbr/brazilian-ecommerce` (versão 2, fixa) com `kagglehub`, gravando direto em `data/` (`output_dir`) e pulando o download se os CSVs já existirem
+- [x] Confirmar que os nove CSVs estão presentes (célula com `assert`)
+- [x] Definir uma semente aleatória global e fixar as versões das bibliotecas em `requirements.txt`
 
-**Pergunta de checagem.** Se outra pessoa clonar o repositório, ela consegue rodar o notebook apenas configurando a própria credencial do Kaggle?
+**Pergunta de checagem.** Se outra pessoa clonar o repositório, ela consegue rodar o notebook apenas instalando o `requirements.txt`?
 
 ---
 
@@ -213,7 +212,7 @@ analise-espera-e-atraso/
 | Resultados | PR-AUC contra o baseline, economia estimada, efeito causal com IC e tabela de impacto |
 | Principais fatores de atraso | Gráfico SHAP e interpretação |
 | Limitações | Premissas causais, premissas de custo e período dos dados |
-| Como reproduzir | Configurar a API do Kaggle, instalar o `requirements.txt` e executar os notebooks `.py` em ordem |
+| Como reproduzir | Instalar o `requirements.txt` e executar os notebooks `.py` em ordem (o dataset é público; o `kagglehub` baixa sem credencial) |
 | Próximos passos | Melhorias planejadas |
 
 ---

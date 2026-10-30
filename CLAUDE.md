@@ -15,10 +15,10 @@ Documentos de referência (leia antes de implementar uma etapa):
 
 ## Estado atual e ambiente
 
-- Projeto em fase inicial: só existe `notebooks/01_carga_e_alvo.py` (vazio).
+- Etapa 0 concluída (setup, download e checagem dos CSVs em `notebooks/01_carga_e_alvo.py`). Próxima: Etapa 1 (RA-01), no mesmo notebook.
 - **Notebooks são scripts `.py` no formato percent** (`#%%` delimita células). Não criar nem converter para `.ipynb`.
-- **Dados:** baixados via API do Kaggle (dataset `olistbr/brazilian-ecommerce`) numa célula `#%%` dedicada no início de `01_carga_e_alvo.py`, salvos em `data/`. `data/` não deve ir para o Git.
-- Não há build, lint nem testes. Ainda não existem `requirements.txt`, `src/` nem `models/` — serão criados nas etapas 2 e 9.
+- **Dados:** baixados com `kagglehub` (não o pacote `kaggle`/`kaggle.json`), dataset `olistbr/brazilian-ecommerce/versions/2`, numa célula `#%%` no início de `01_carga_e_alvo.py`, gravados direto em `data/` via `output_dir` (não no cache do kagglehub). `data/` não deve ir para o Git.
+- Não há build, lint nem testes. `requirements.txt` tem as versões fixadas (acrescentar libs conforme as etapas exigirem). Ainda não existem `src/` nem `models/` — serão criados nas etapas 2 e 9.
 
 ## Arquitetura planejada
 
@@ -34,4 +34,4 @@ Documentos de referência (leia antes de implementar uma etapa):
 - **Validação temporal (RA-04):** split cronológico treino/validação/teste, sem embaralhar; excluir do teste as últimas semanas da base (só contêm pedidos já entregues, o que reduz artificialmente a taxa de atraso). Hiperparâmetros e limiar de custo escolhidos só na validação; teste usado uma única vez.
 - **Métrica principal:** PR-AUC (apoio: ROC-AUC, precisão/recall no limiar). Baseline = regressão logística; modelo principal = LightGBM com early stopping; interpretabilidade com SHAP.
 - **Pedidos com vários itens:** documentar regra para vendedor/categoria principal (ex.: item de maior preço) e o critério de deduplicação de avaliações por pedido.
-- **Reprodutibilidade (RNF-01):** semente global fixa e versões das bibliotecas registradas.
+- **Reprodutibilidade (RNF-01):** semente global fixa e dependências com versão fixada em `requirements.txt` (sem célula de print de versões nos notebooks).

@@ -166,7 +166,7 @@ Duas perguntas orientam o projeto. A primeira é **preditiva**: é possível ide
 | RNF-02 | Ausência de vazamento: nenhum atributo posterior à compra |
 | RNF-03 | Organização: notebooks numerados por etapa e funções reutilizáveis em módulo separado |
 | RNF-04 | Documentação: README com problema, decisões, resultados e limitações |
-| RNF-05 | Execução: dados obtidos via API do Kaggle e notebooks em scripts `.py` com células `#%%`, executáveis em ordem sem passos manuais além da credencial do Kaggle |
+| RNF-05 | Execução: dados obtidos via API do Kaggle e notebooks em scripts `.py` com células `#%%`, executáveis em ordem sem passos manuais além de instalar o `requirements.txt` |
 
 ## 10. Métricas de sucesso do projeto
 
