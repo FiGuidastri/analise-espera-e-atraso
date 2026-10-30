@@ -72,3 +72,9 @@ print(DICIONARIO.to_string(index=False))
 # Salva a base para os próximos notebooks
 base.to_parquet(DATA_DIR / "base_analitica.parquet", index=False)
 print("salvo:", DATA_DIR / "base_analitica.parquet")
+
+# Versão enxuta para o app Streamlit (vai para o Git): sem identificadores nem texto
+# dos comentários, que o app não usa.
+base.drop(columns=["order_id", "review_comment_title", "review_comment_message"]).to_parquet(
+    REPORTS_DIR / "base_app.parquet", index=False)
+print("salvo:", REPORTS_DIR / "base_app.parquet")

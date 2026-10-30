@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
-DATA_DIR = ROOT / "data"
 MODELS_DIR = ROOT / "models"
 FIG_DIR = ROOT / "reports" / "figuras"
 sys.path.insert(0, str(ROOT))
@@ -17,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 from src.estilo import AZUL, CINZA, aplicar_estilo
 
 aplicar_estilo()
-previsoes = pd.read_parquet(DATA_DIR / "previsoes.parquet")
+previsoes = pd.read_parquet(ROOT / "reports" / "previsoes.parquet")
 val = previsoes[previsoes["conjunto"] == "validacao"]
 teste = previsoes[previsoes["conjunto"] == "teste"]
 

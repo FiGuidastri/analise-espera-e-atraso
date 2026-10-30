@@ -24,8 +24,9 @@ Documentos de referência (leia antes de implementar uma etapa):
 
 - Notebooks `.py` numerados por etapa: `01_carga_e_alvo`, `02_atributos`, `03_exploracao`, `04_modelagem`, `05_decisao_custo`, `06_causal`, `07_texto`, `08_impacto`.
 - `src/features.py` — carga, alvo, agregações, `construir_base`, `preparar_x` e as listas `ATRIBUTOS*` (RNF-03). `src/estilo.py` — estilo único dos gráficos.
-- Fluxo de arquivos: 02 grava `data/base_analitica.parquet` (lida por 03–08); 04 grava `data/previsoes.parquet` (lida por 05); 06 grava `reports/resultados_causais.json` (lido por 08). Figuras em `reports/figuras/`.
-- `models/` — modelo serializado (`*.joblib` fora do Git, regenerado pelo 04), `atributos.json` e `limiar.json`.
+- Fluxo de arquivos: 02 grava `data/base_analitica.parquet` (lida por 03–08) e `reports/base_app.parquet` (versão enxuta, sem ids e comentários); 04 grava `reports/previsoes.parquet` (lida por 05 e pelo app); 06 grava `reports/resultados_causais.json` (lido por 08 e pelo app). Figuras em `reports/figuras/`.
+- `app/relatorio.py` — relatório Streamlit (`streamlit run app/relatorio.py`); lê só arquivos versionados de `reports/` e `models/`, nunca `data/`, para funcionar no Streamlit Community Cloud.
+- `models/` — `modelo_lgbm.joblib` (versionado, ~0,3 MB, usado pelo app), `atributos.json` e `limiar.json`.
 - Split temporal fixo no 04: treino < 2018-03-01, validação < 2018-06-01, teste < 2018-08-13 (depois disso, excluído por viés de fim de base).
 - Base analítica: **uma linha por pedido**, compras a partir de jan/2017, apenas pedidos `delivered` com data de entrega preenchida.
 

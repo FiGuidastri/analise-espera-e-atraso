@@ -93,6 +93,19 @@ Modelo parcialmente linear com cross-fitting em 5 partições e LightGBM nos mod
 
 **Em uma frase:** cortar os atrasos pela metade evita cerca de 170 avaliações negativas a cada 10 mil pedidos. Como o efeito cresce com os dias de atraso, atacar primeiro os atrasos longos rende mais.
 
+## Relatório interativo (Streamlit)
+
+`app/relatorio.py` reúne os resultados em sete páginas. Três delas são interativas:
+- **Exploração:** filtros de período e região.
+- **Simulador de risco:** você informa um pedido e vê o risco previsto e o que puxa esse risco.
+- **Decisão por custo:** sliders das premissas que recalculam a economia na hora.
+
+O app lê só arquivos versionados (`reports/base_app.parquet`, `reports/previsoes.parquet`, `reports/resultados_causais.json`, `models/`), então roda sem os dados brutos:
+
+```bash
+streamlit run app/relatorio.py
+```
+
 ## Limitações
 
 - **Causal:** supõe que não há confundidores não observados. A qualidade do vendedor afeta atraso e nota ao mesmo tempo e não está no modelo, então o efeito pode estar superestimado. A nota só existe para quem avaliou (possível viés de seleção).
@@ -110,7 +123,7 @@ for n in 0*.py; do echo "== $n"; MPLBACKEND=Agg python "$n" || break; done
 
 O dataset é público e o `kagglehub` baixa sem credencial, direto em `data/`. Os notebooks também rodam célula a célula (`#%%`) no VS Code ou no Spyder. A execução completa leva cerca de 6 minutos; o `06_causal.py` sozinho, uns 3.
 
-Saídas: `models/` (modelo LightGBM, atributos e limiar), `reports/` (dicionário de atributos, tabelas de resultado) e `reports/figuras/`.
+Saídas: `models/` (modelo LightGBM, atributos e limiar), `reports/` (dicionário de atributos, tabelas de resultado e os dados enxutos do app) e `reports/figuras/`.
 
 ## Próximos passos
 
@@ -120,4 +133,4 @@ Saídas: `models/` (modelo LightGBM, atributos e limiar), `reports/` (dicionári
 | Recalibrar o risco por período | O limiar fixo sofre com a variação da taxa de atraso entre períodos |
 | Validação temporal com várias janelas (rolling origin) | Escolha de modelo menos dependente de um único período de validação |
 | Análise de sensibilidade causal (ex.: E-value) | Mede quão forte um confundidor oculto precisaria ser para anular o efeito |
-| API em FastAPI ou app em Streamlit | Leva o modelo para uso |
+| API em FastAPI | Leva o modelo para uso em produção |

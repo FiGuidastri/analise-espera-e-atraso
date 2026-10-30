@@ -244,9 +244,9 @@ json.dump({
 }, open(MODELS_DIR / "atributos.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 
 previsoes = pd.concat([
-    pd.DataFrame({"order_id": base.loc[idx[c], "order_id"], "conjunto": c, "atrasou": y[idx[c]],
+    pd.DataFrame({"conjunto": c, "atrasou": y[idx[c]],
                   "p_logit": pred[c]["logit"], "p_lgbm": pred[c]["lgbm"]})
     for c in ["validacao", "teste"]
 ])
-previsoes.to_parquet(DATA_DIR / "previsoes.parquet", index=False)
-print("salvos: models/modelo_lgbm.joblib, models/atributos.json, data/previsoes.parquet")
+previsoes.to_parquet(ROOT / "reports" / "previsoes.parquet", index=False)
+print("salvos: models/modelo_lgbm.joblib, models/atributos.json, reports/previsoes.parquet")

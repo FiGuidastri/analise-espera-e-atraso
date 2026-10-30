@@ -15,9 +15,9 @@ __pycache__/
 venv/
 .env
 
-# Modelos pesados (versionar só se forem pequenos)
+# Modelos pesados (versionar só se forem pequenos; modelo_lgbm.joblib tem ~0,3 MB e vai
+# para o Git porque o app Streamlit precisa dele)
 models/*.pkl
-models/*.joblib
 models/*.txt
 
 # IDE / SO
