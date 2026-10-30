@@ -2,8 +2,8 @@
 # Faixas em vez de versões fixas: o Cloud usa um Python recente e versões antigas
 # sem wheel para ele são compiladas do zero, o que trava o deploy.
 # Para rodar os notebooks, use requirements-analise.txt (versões fixadas, RNF-01).
-streamlit>=1.45
-altair>=5.5,<6
+streamlit>=1.50
+altair>=6
 pandas>=2.2,<3
 numpy>=2.1
 pyarrow>=19

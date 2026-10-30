@@ -129,7 +129,7 @@ quando ele já aconteceu e a avaliação negativa já foi registrada.
             tooltip=[alt.Tooltip("mes_compra:T", format="%b/%Y", title="mês"),
                      alt.Tooltip("atrasou:Q", format=".1%", title="taxa")],
         ).properties(title="Taxa de atraso por mês de compra", height=280),
-        use_container_width=True,
+        width="stretch",
     )
 
 
@@ -150,17 +150,17 @@ def exploracao():
     col1, col2 = st.columns(2)
     col1.altair_chart(barras_taxa(taxa_por(df, "uf_cliente"), "uf_cliente",
                                   "H-02 · Taxa por UF do cliente", horizontal=True, media=media),
-                      use_container_width=True)
+                      width="stretch")
     dist = df.assign(faixa=pd.cut(df["distancia_km"], [0, 100, 300, 600, 1000, 2000, np.inf], right=False,
                                   labels=["<100", "100–300", "300–600", "600–1000", "1000–2000", "≥2000"]))
     col2.altair_chart(barras_taxa(taxa_por(dist, "faixa"), "faixa", "H-01 · Taxa por distância (km)",
                                   ordem=list(dist["faixa"].cat.categories), media=media),
-                      use_container_width=True)
+                      width="stretch")
     prazo = df.assign(faixa=pd.cut(df["prazo_estimado_dias"], [0, 10, 15, 20, 25, 30, 40, np.inf], right=False,
                                    labels=["<10", "10–15", "15–20", "20–25", "25–30", "30–40", "≥40"]))
     col2.altair_chart(barras_taxa(taxa_por(prazo, "faixa"), "faixa", "H-03 · Taxa por prazo estimado (dias)",
                                   ordem=list(prazo["faixa"].cat.categories), media=media),
-                      use_container_width=True)
+                      width="stretch")
 
     notas = (df.dropna(subset=["review_score"])
              .assign(situacao=lambda d: np.where(d["atrasou"] == 1, "atrasado", "no prazo"))
@@ -176,7 +176,7 @@ def exploracao():
             tooltip=[alt.Tooltip("situacao:N", title="pedido"), alt.Tooltip("review_score:O", title="nota"),
                      alt.Tooltip("fracao:Q", format=".1%", title="% das avaliações")],
         ).properties(title="Distribuição da nota: atrasados × no prazo", height=300),
-        use_container_width=True,
+        width="stretch",
     )
 
 
@@ -191,7 +191,7 @@ def modelo():
                          m["teste_lgbm"]["PR-AUC"]],
         "ROC-AUC teste": [0.5, m["teste_logit"]["ROC-AUC"], m["teste_lgbm"]["ROC-AUC"]],
     })
-    st.dataframe(tabela.style.format(precision=3, decimal=","), hide_index=True, use_container_width=True)
+    st.dataframe(tabela.style.format(precision=3, decimal=","), hide_index=True, width="stretch")
     c = meta["cortes"]
     st.markdown(f"""
 Split temporal: treino até {c['treino_fim']}, validação até {c['validacao_fim']}, teste até
@@ -212,7 +212,7 @@ do atraso depende do que acontece depois.
             alt.Color("modelo:N", title=None, scale=alt.Scale(range=[AZUL, CINZA])),
             tooltip=["modelo", alt.Tooltip("recall:Q", format=".0%"), alt.Tooltip("precisão:Q", format=".1%")],
         ).properties(title="Curva precisão-recall no teste", height=320),
-        use_container_width=True,
+        width="stretch",
     )
 
     st.subheader("O que move o risco (SHAP)")
@@ -302,7 +302,7 @@ def simulador():
                       scale=alt.Scale(domain=["aumenta o risco", "reduz o risco"], range=[LARANJA, AZUL])),
             tooltip=["atributo", alt.Tooltip("contribuicao:Q", format="+.3f", title="contribuição")],
         ).properties(title="Por que esse risco", height=340),
-        use_container_width=True,
+        width="stretch",
     )
 
 
@@ -355,7 +355,7 @@ def decisao():
     escolhido = alt.Chart(pd.DataFrame({"x": [limiares[i]]})).mark_rule(color=LARANJA, strokeDash=[4, 4]).encode(x="x:Q")
     st.altair_chart((linhas + zero + escolhido).properties(
         title="Economia por limiar (tracejado = limiar escolhido na validação)", height=340),
-        use_container_width=True)
+        width="stretch")
     st.markdown(f"""
 A validação tem **{pct(y_val.mean())}** de atrasos e o teste só **{pct(y_teste.mean())}**. Com poucos
 atrasos, a precisão entre os pedidos sinalizados cai perto do risco de equilíbrio e a ação passa a
@@ -390,7 +390,7 @@ dos pedidos que atrasam.
     barras_erro = alt.Chart(dose).mark_rule(color=LARANJA).encode(
         alt.X("faixa:N", sort=None), alt.Y("ic_inf:Q"), alt.Y2("ic_sup:Q"))
     st.altair_chart((barras_erro + pontos).properties(
-        title="H-05 · Efeito causal por duração do atraso (IC 95%)", height=320), use_container_width=True)
+        title="H-05 · Efeito causal por duração do atraso (IC 95%)", height=320), width="stretch")
 
     st.subheader("Voz do cliente")
     st.markdown("Termos que um classificador TF-IDF associa a comentários de pedidos atrasados × no prazo "
