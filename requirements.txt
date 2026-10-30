@@ -1,14 +1,13 @@
-pandas==2.2.3
-numpy==2.1.3
-matplotlib==3.10.0
-kagglehub==1.0.3
-pyarrow==19.0.0
-scikit-learn==1.6.1
-lightgbm==4.7.0
-shap==0.54.1
-scipy==1.15.3
-joblib==1.4.2
-nltk==3.9.1
-unidecode==1.3.8
-streamlit==1.45.1
-altair==5.5.0
+# Dependências do app Streamlit (o Community Cloud instala este arquivo).
+# Faixas em vez de versões fixas: o Cloud usa um Python recente e versões antigas
+# sem wheel para ele são compiladas do zero, o que trava o deploy.
+# Para rodar os notebooks, use requirements-analise.txt (versões fixadas, RNF-01).
+streamlit>=1.45
+altair>=5.5,<6
+pandas>=2.2,<3
+numpy>=2.1
+pyarrow>=19
+scikit-learn>=1.6
+lightgbm>=4.6
+joblib>=1.4
+matplotlib>=3.10

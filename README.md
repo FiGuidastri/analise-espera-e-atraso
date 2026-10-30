@@ -116,7 +116,7 @@ streamlit run app/relatorio.py
 ## Como reproduzir
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-analise.txt
 cd notebooks
 for n in 0*.py; do echo "== $n"; MPLBACKEND=Agg python "$n" || break; done
 ```

@@ -18,7 +18,7 @@ Documentos de referência (leia antes de implementar uma etapa):
 - Etapas 0–9 implementadas; os 8 notebooks rodam em ordem (`cd notebooks; for n in 0*.py; do MPLBACKEND=Agg python "$n" || break; done`, ~6 min).
 - **Notebooks são scripts `.py` no formato percent** (`#%%` delimita células). Não criar nem converter para `.ipynb`.
 - **Dados:** baixados com `kagglehub` (não o pacote `kaggle`/`kaggle.json`), dataset `olistbr/brazilian-ecommerce/versions/2`, numa célula `#%%` no início de `01_carga_e_alvo.py`, gravados direto em `data/` via `output_dir` (não no cache do kagglehub). `data/` não deve ir para o Git.
-- Não há build, lint nem testes. `requirements.txt` tem as versões fixadas (acrescentar libs conforme as etapas exigirem).
+- Não há build, lint nem testes. `requirements-analise.txt` tem as versões fixadas dos notebooks; `requirements.txt` tem só as libs do app (faixas de versão, lido pelo Streamlit Community Cloud).
 
 ## Arquitetura
 
@@ -37,4 +37,4 @@ Documentos de referência (leia antes de implementar uma etapa):
 - **Validação temporal (RA-04):** split cronológico treino/validação/teste, sem embaralhar; excluir do teste as últimas semanas da base (só contêm pedidos já entregues, o que reduz artificialmente a taxa de atraso). Hiperparâmetros e limiar de custo escolhidos só na validação; teste usado uma única vez.
 - **Métrica principal:** PR-AUC (apoio: ROC-AUC, precisão/recall no limiar). Baseline = regressão logística; modelo principal = LightGBM com early stopping; interpretabilidade com SHAP.
 - **Pedidos com vários itens:** documentar regra para vendedor/categoria principal (ex.: item de maior preço) e o critério de deduplicação de avaliações por pedido.
-- **Reprodutibilidade (RNF-01):** semente global fixa e dependências com versão fixada em `requirements.txt` (sem célula de print de versões nos notebooks).
+- **Reprodutibilidade (RNF-01):** semente global fixa e dependências com versão fixada em `requirements-analise.txt` (sem célula de print de versões nos notebooks).
